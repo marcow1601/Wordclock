@@ -14,6 +14,8 @@ bool wifiFirstConnected = false;
 
 int8_t nowHour;
 int8_t nowMinute;
+int8_t minuteRounded;
+int8_t hourCompensated;
 
 int display[10][11] = {0};
 
@@ -118,7 +120,10 @@ void loop() {
     nowHour = hour()%12;
     nowMinute = minute();
 
-    int8_t minuteRounded = nowMinute-(nowMinute%5);
+    minuteRounded = nowMinute-(nowMinute%5);
+    if(minuteRounded >= 25) hourCompensated = nowHour + 1; 
+
+    
     for(int8_t row=0; row<10; row++){
       for(int8_t col=0; col<11; col++){
         display[row][col] = 0;
@@ -135,7 +140,7 @@ void loop() {
 
     // Hour
     // "ZWÖLF"
-    if(nowHour == 0){
+    if(hourCompensated == 0){
       display[8][6] = 1;
       display[8][7] = 1;
       display[8][8] = 1;
@@ -143,42 +148,42 @@ void loop() {
       display[8][10] = 1;
     }
     // "EINS"
-    else if(nowHour == 1){
+    else if(hourCompensated == 1){
       display[5][0] = 1;
       display[5][1] = 1;
       display[5][2] = 1;
       display[5][3] = 1;
     }
     // "ZWEI"
-    else if(nowHour == 2){
+    else if(hourCompensated == 2){
       display[5][7] = 1;
       display[5][8] = 1;
       display[5][9] = 1;
       display[5][10] = 1;
     }
     // "DREI"
-    else if(nowHour == 3){
+    else if(hourCompensated == 3){
       display[6][0] = 1;
       display[6][1] = 1;
       display[6][2] = 1;
       display[6][3] = 1;
     }
     // "VIER"
-    else if(nowHour == 4){
+    else if(hourCompensated == 4){
       display[6][7] = 1;
       display[6][8] = 1;
       display[6][9] = 1;
       display[6][10] = 1;
     }
     // "FÜNF"
-    else if(nowHour == 5){
+    else if(hourCompensated == 5){
       display[4][7] = 1;
       display[4][8] = 1;
       display[4][9] = 1;
       display[4][10] = 1;
     }
     // "SECHS"
-    else if(nowHour == 6){
+    else if(hourCompensated == 6){
       display[7][0] = 1;
       display[7][1] = 1;
       display[7][2] = 1;
@@ -186,7 +191,7 @@ void loop() {
       display[7][4] = 1;
     }
     // "SIEBEN"
-    else if(nowHour == 7){
+    else if(hourCompensated == 7){
       display[8][0] = 1;
       display[8][1] = 1;
       display[8][2] = 1;
@@ -195,28 +200,28 @@ void loop() {
       display[8][5] = 1;
     }
     // "ACHT"
-    else if(nowHour == 8){
+    else if(hourCompensated == 8){
       display[7][7] = 1;
       display[7][8] = 1;
       display[7][9] = 1;
       display[7][10] = 1;
     }
     // "NEUN"
-    else if(nowHour == 9){
+    else if(hourCompensated == 9){
       display[9][3] = 1;
       display[9][4] = 1;
       display[9][5] = 1;
       display[9][6] = 1;
     }
     // "ZEHN"
-    else if(nowHour == 10){
+    else if(hourCompensated == 10){
       display[9][0] = 1;
       display[9][1] = 1;
       display[9][2] = 1;
       display[9][3] = 1;
     }
     // "ELF"
-    else if(nowHour == 11){
+    else if(hourCompensated == 11){
       display[4][5] = 1;
       display[4][6] = 1;
       display[4][7] = 1;
@@ -224,7 +229,7 @@ void loop() {
     
     // Is full hour?
     if(minuteRounded == 0){
-      if(nowHour == 1) display[5][3] == 0; // "EINS" -> "EIN"
+      if(hourCompensated == 1) display[5][3] == 0; // "EINS" -> "EIN"
 
       // "UHR"
       display[9][8] = 1;
