@@ -18,8 +18,17 @@ int8_t nowMinute;
 int display[10][11] = {0};
 
 char text[10][11] = {
-  'E','S',
-}
+  {'E','S','K','I','S','T','A','F','Ü','N','F'},
+  {'Z','E','H','N','Z','W','A','N','Z','I','G'},
+  {'D','R','E','I','V','I','E','R','T','E','L'},
+  {'V','O','R','F','U','N','K','N','A','C','H'},
+  {'H','A','L','B','A','E','L','F','Ü','N','F'},
+  {'E','I','N','S','X','A','M','Z','W','E','I'},
+  {'D','R','E','I','P','M','J','V','I','E','R'},
+  {'S','E','C','H','S','N','L','A','C','H','T'},
+  {'S','I','E','B','E','N','Z','W','Ö','L','F'},
+  {'Z','E','H','N','E','U','N','K','U','H','R'},
+};
 
 void onSTAConnected (WiFiEventStationModeConnected ipInfo) {
     Serial.printf ("Connected to %s\r\n", ipInfo.ssid.c_str ());
@@ -79,6 +88,17 @@ void setup() {
 
 }
 
+void debugOutput(){
+  for(int8_t row=0; row<10; row++){
+      for(int8_t col=0; col<11; col++){
+        if(display[row][col] ==1){
+          Serial.print(text[row][col]);
+        }
+      }
+      Serial.print("\n");
+    }
+}
+
 void loop() {
   static int last = 0;
 
@@ -93,7 +113,7 @@ void loop() {
       syncEventTriggered = false;
   }
 
-  if ((millis () - last) > 1000) {
+  if ((millis () - last) > 30000) {
     last = millis ();
     nowHour = hour()%12;
     nowMinute = minute();
@@ -103,8 +123,8 @@ void loop() {
       for(int8_t col=0; col<11; col++){
         display[row][col] = 0;
       }
-      
     }
+    
     // "ES IST"
     display[0][0] = 1;
     display[0][1] = 1;
@@ -380,6 +400,7 @@ void loop() {
         display[3][2] = 1;
       }      
     }
+    debugOutput();
   }
   delay (0);
 }
