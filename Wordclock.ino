@@ -12,6 +12,11 @@ int8_t timeZone = 1;
 int8_t minutesTimeZone = 0;
 bool wifiFirstConnected = false;
 
+int8_t nowHour;
+int8_t nowMinute;
+
+int display[11][10] = {0};
+
 void onSTAConnected (WiFiEventStationModeConnected ipInfo) {
     Serial.printf ("Connected to %s\r\n", ipInfo.ssid.c_str ());
 }
@@ -71,34 +76,305 @@ void setup() {
 }
 
 void loop() {
-  static int i = 0;
-    static int last = 0;
+  static int last = 0;
 
-    if (wifiFirstConnected) {
-        wifiFirstConnected = false;
-        NTP.begin ("pool.ntp.org", timeZone, true, minutesTimeZone);
-        NTP.setInterval (63);
+  if (wifiFirstConnected) {
+      wifiFirstConnected = false;
+      NTP.begin ("pool.ntp.org", timeZone, true, minutesTimeZone);
+      NTP.setInterval (63);
+  }
+
+  if (syncEventTriggered) {
+      processSyncEvent (ntpEvent);
+      syncEventTriggered = false;
+  }
+
+  if ((millis () - last) > 1000) {
+    last = millis ();
+    nowHour = hour()%12;
+    nowMinute = minute();
+
+    int8_t minuteRounded = nowMinute-(nowMinute%5);
+    for(int8_t x=0; x<11; x++){
+      for(int8_t y=0; y<10; y++){
+        display[x][y] = 0;
+      }
+      
     }
+    // "ES IST"
+    display[0][0] = 1;
+    display[1][0] = 1;
+    display[3][0] = 1;
+    display[4][0] = 1;
+    display[5][0] = 1;
 
-    if (syncEventTriggered) {
-        processSyncEvent (ntpEvent);
-        syncEventTriggered = false;
+    // Hour
+    // "ZWÖLF"
+    if(nowHour == 0){
+      display[6][8] = 1;
+      display[7][8] = 1;
+      display[8][8] = 1;
+      display[9][8] = 1;
+      display[10][8] = 1;
     }
-
-    if ((millis () - last) > 5100) {
-        //Serial.println(millis() - last);
-        last = millis ();
-        Serial.print (i); Serial.print (" ");
-        Serial.print (NTP.getTimeDateString ()); Serial.print (" ");
-        Serial.print (NTP.isSummerTime () ? "Summer Time. " : "Winter Time. ");
-        Serial.print ("WiFi is ");
-        Serial.print (WiFi.isConnected () ? "connected" : "not connected"); Serial.print (". ");
-        Serial.print ("Uptime: ");
-        Serial.print (NTP.getUptimeString ()); Serial.print (" since ");
-        Serial.println (NTP.getTimeDateString (NTP.getFirstSync ()).c_str ());
-
-        i++;
+    // "EINS"
+    else if(nowHour == 1){
+      display[0][5] = 1;
+      display[1][5] = 1;
+      display[2][5] = 1;
+      display[3][5] = 1;
     }
-    delay (0);
+    // "ZWEI"
+    else if(nowHour == 2){
+      display[7][5] = 1;
+      display[8][5] = 1;
+      display[9][5] = 1;
+      display[10][5] = 1;
+    }
+    // "DREI"
+    else if(nowHour == 3){
+      display[0][6] = 1;
+      display[1][6] = 1;
+      display[2][6] = 1;
+      display[3][6] = 1;
+    }
+    // "VIER"
+    else if(nowHour == 4){
+      display[7][6] = 1;
+      display[8][6] = 1;
+      display[9][6] = 1;
+      display[10][6] = 1;
+    }
+    // "FÜNF"
+    else if(nowHour == 5){
+      display[7][4] = 1;
+      display[8][4] = 1;
+      display[9][4] = 1;
+      display[10][4] = 1;
+    }
+    // "SECHS"
+    else if(nowHour == 6){
+      display[0][7] = 1;
+      display[1][7] = 1;
+      display[2][7] = 1;
+      display[3][7] = 1;
+      display[4][7] = 1;
+    }
+    // "SIEBEN"
+    else if(nowHour == 7){
+      display[0][8] = 1;
+      display[1][8] = 1;
+      display[2][8] = 1;
+      display[3][8] = 1;
+      display[4][8] = 1;
+      display[5][8] = 1;
+    }
+    // "ACHT"
+    else if(nowHour == 8){
+      display[7][7] = 1;
+      display[8][7] = 1;
+      display[9][7] = 1;
+      display[10][7] = 1;
+    }
+    // "NEUN"
+    else if(nowHour == 9){
+      display[3][9] = 1;
+      display[4][9] = 1;
+      display[5][9] = 1;
+      display[6][9] = 1;
+    }
+    // "ZEHN"
+    else if(nowHour == 10){
+      display[0][9] = 1;
+      display[1][9] = 1;
+      display[2][9] = 1;
+      display[3][9] = 1;
+    }
+    // "ELF"
+    else if(nowHour == 11){
+      display[5][4] = 1;
+      display[6][4] = 1;
+      display[7][4] = 1;
+    }
+    
+    // Is full hour?
+    if(minuteRounded == 0){
+      if(nowHour == 1) display[3][5] == 0; // "EINS" -> "EIN"
 
+      // "UHR"
+      display[8][9] = 1;
+      display[9][9] = 1;
+      display[10][9] = 1;
+    }
+    else {
+      // "FÜNF NACH"
+      if(minuteRounded == 5){
+        // Fünf Minuten
+        display[7][0] = 1;
+        display[8][0] = 1;
+        display[9][0] = 1;
+        display[10][0] = 1;
+
+        // Nach
+        display[7][3] = 1;
+        display[8][3] = 1;
+        display[9][3] = 1;
+        display[10][3] = 1;
+      }
+      // "ZEHN NACH"
+      else if(minuteRounded == 10){
+        // Zehn Minuten
+        display[0][1] = 1;
+        display[1][1] = 1;
+        display[2][1] = 1;
+        display[3][1] = 1;
+
+        // Nach
+        display[7][3] = 1;
+        display[8][3] = 1;
+        display[9][3] = 1;
+        display[10][3] = 1;
+      }
+      // "VIERTEL NACH"
+      else if(minuteRounded == 15){
+        // Viertel
+        display[4][2] = 1;
+        display[5][2] = 1;
+        display[6][2] = 1;
+        display[7][2] = 1;
+        display[8][2] = 1;
+        display[9][2] = 1;
+        display[10][2] = 1;
+
+        // Nach
+        display[7][3] = 1;
+        display[8][3] = 1;
+        display[9][3] = 1;
+        display[10][3] = 1;
+        
+      }
+      // "ZWANZIG NACH"
+      else if(minuteRounded == 20){
+        // Zwanzig
+        display[4][1] = 1;
+        display[5][1] = 1;
+        display[6][1] = 1;
+        display[7][1] = 1;
+        display[8][1] = 1;
+        display[9][1] = 1;
+        display[10][1] = 1;
+
+        // Nach
+        display[7][3] = 1;
+        display[8][3] = 1;
+        display[9][3] = 1;
+        display[10][3] = 1;
+      }
+      // "FÜNF VOR HALB"
+      else if(minuteRounded == 25){
+        // Fünf Minuten
+        display[7][0] = 1;
+        display[8][0] = 1;
+        display[9][0] = 1;
+        display[10][0] = 1;
+
+        // Vor
+        display[0][3] = 1;
+        display[1][3] = 1;
+        display[2][3] = 1;
+
+        // Halb
+        display[0][4] = 1;
+        display[1][4] = 1;
+        display[2][4] = 1;
+        display[3][4] = 1;
+      }
+      // "HALB"
+      else if(minuteRounded == 30){
+        // Halb
+        display[0][4] = 1;
+        display[1][4] = 1;
+        display[2][4] = 1;
+        display[3][4] = 1;
+      }
+      // "FÜNF NACH HALB"
+      else if(minuteRounded == 35){
+        // Fünf Minuten
+        display[7][0] = 1;
+        display[8][0] = 1;
+        display[9][0] = 1;
+        display[10][0] = 1;
+
+        // Nach
+        display[7][3] = 1;
+        display[8][3] = 1;
+        display[9][3] = 1;
+        display[10][3] = 1;
+
+        // Halb
+        display[0][4] = 1;
+        display[1][4] = 1;
+        display[2][4] = 1;
+        display[3][4] = 1;
+      }
+      // "ZWANGZIG VOR"
+      else if(minuteRounded == 40){
+        // Zwanzig
+        display[4][1] = 1;
+        display[5][1] = 1;
+        display[6][1] = 1;
+        display[7][1] = 1;
+        display[8][1] = 1;
+        display[9][1] = 1;
+        display[10][1] = 1;
+
+        // Vor
+        display[0][3] = 1;
+        display[1][3] = 1;
+        display[2][3] = 1;
+      }
+      // "DREIVIERTEL"
+      else if(minuteRounded == 45){
+        // Dreiviertel
+        display[0][2] = 1;
+        display[1][2] = 1;
+        display[2][2] = 1;
+        display[3][2] = 1;
+        display[4][2] = 1;
+        display[5][2] = 1;
+        display[6][2] = 1;
+        display[7][2] = 1;
+        display[8][2] = 1;
+        display[9][2] = 1;
+        display[10][2] = 1;
+      }
+      // "ZEHN VOR"
+      else if(minuteRounded == 50){
+        // Zehn Minuten
+        display[0][1] = 1;
+        display[1][1] = 1;
+        display[2][1] = 1;
+        display[3][1] = 1;
+
+        // Vor
+        display[0][3] = 1;
+        display[1][3] = 1;
+        display[2][3] = 1;
+      }
+      // "FÜNF VOR"
+      else if(minuteRounded == 55){
+        // Fünf Minuten
+        display[7][0] = 1;
+        display[8][0] = 1;
+        display[9][0] = 1;
+        display[10][0] = 1;
+
+        // Vor
+        display[0][3] = 1;
+        display[1][3] = 1;
+        display[2][3] = 1;
+      }      
+    }
+  }
+  delay (0);
 }
