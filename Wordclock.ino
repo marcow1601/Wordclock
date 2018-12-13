@@ -2,6 +2,7 @@
 #include "WifiConfig.h"
 #include <NtpClientLib.h>
 #include <ESP8266WiFi.h>
+#include <Adafruit_NeoPixel.h>
 
 #ifndef WIFI_CONFIG_H
 #define YOUR_WIFI_SSID "YOUR_WIFI_SSID"
@@ -18,6 +19,7 @@ int8_t minuteRounded;
 int8_t hourCompensated;
 
 int display[10][11] = {0};
+Adafruit_NeoPixel leds = Adafruit_NeoPixel(110, 5, NEO_GRB + NEO_KHZ800);
 
 char text[10][11] = {
   {'E','S','K','I','S','T','A','F','Ü','N','F'},
@@ -71,22 +73,26 @@ NTPSyncEvent_t ntpEvent; // Last triggered event
 void setup() {
   static WiFiEventHandler e1, e2, e3;
 
-    Serial.begin (115200);
-    Serial.println ();
-    WiFi.mode (WIFI_STA);
-    WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
+  // Init leds to turn off
+  leds.begin();
+  leds.show();
 
-    pinMode (LED_BUILTIN, OUTPUT); // Onboard LED
-    digitalWrite (LED_BUILTIN, HIGH); // Switch off LED
+  Serial.begin (115200);
+  Serial.println ();
+  WiFi.mode (WIFI_STA);
+  WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
 
-    NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
-        ntpEvent = event;
-        syncEventTriggered = true;
-    });
+  pinMode (LED_BUILTIN, OUTPUT); // Onboard LED
+  digitalWrite (LED_BUILTIN, HIGH); // Switch off LED
 
-    e1 = WiFi.onStationModeGotIP (onSTAGotIP);// As soon WiFi is connected, start NTP Client
-    e2 = WiFi.onStationModeDisconnected (onSTADisconnected);
-    e3 = WiFi.onStationModeConnected (onSTAConnected);
+  NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
+      ntpEvent = event;
+      syncEventTriggered = true;
+  });
+
+  e1 = WiFi.onStationModeGotIP (onSTAGotIP);// As soon WiFi is connected, start NTP Client
+  e2 = WiFi.onStationModeDisconnected (onSTADisconnected);
+  e3 = WiFi.onStationModeConnected (onSTAConnected);
 
 }
 
@@ -106,8 +112,8 @@ void loop() {
 
   if (wifiFirstConnected) {
       wifiFirstConnected = false;
-      NTP.begin ("pool.ntp.org", timeZone, true, minutesTimeZone);
-      NTP.setInterval (63);
+      NTP.begin("pool.ntp.org", timeZone, true, minutesTimeZone);
+      NTP.setInterval(63);
   }
 
   if (syncEventTriggered) {
@@ -115,10 +121,14 @@ void loop() {
       syncEventTriggered = false;
   }
 
-  if ((millis () - last) > 30000) {
+  if ((millis () - last) > 5000) {
     last = millis ();
     nowHour = hour()%12;
     nowMinute = minute();
+
+    Serial.print(nowHour);
+    Serial.print(":");
+    Serial.println(nowMinute);
 
     minuteRounded = nowMinute-(nowMinute%5);
     if(minuteRounded >= 25) hourCompensated = nowHour + 1; 
@@ -127,6 +137,7 @@ void loop() {
     for(int8_t row=0; row<10; row++){
       for(int8_t col=0; col<11; col++){
         display[row][col] = 0;
+        leds.setPixelColor(row*11+col, 0,0,0);
       }
     }
     
@@ -406,6 +417,22 @@ void loop() {
       }      
     }
     debugOutput();
+
+    for(int8_t row=0; row<10; ++row){
+      for(int8_t col=0; col<11; ++col){
+        if(display[row][col] == 1){
+          // Odd row => right to left number
+          if(row%2){
+            leds.setPixelColor(row*11+(10-col), 255,255,255);
+          }
+          // Even row => left to right number
+          else {
+            leds.setPixelColor(row*11+col, 255,255,255);
+          }
+        }
+      }
+    }
+    leds.show();
   }
   delay (0);
 }
