@@ -54,6 +54,8 @@ boolean syncEventTriggered = false; // True if a time event has been triggered
 NTPSyncEvent_t ntpEvent; // Last triggered event
 
 void setup() {
+  pinMode (LED_BUILTIN, OUTPUT); // Onboard LED
+  digitalWrite (LED_BUILTIN, HIGH); // Switch off LED
 
   // Init leds to turn off
   leds.begin();
@@ -66,22 +68,12 @@ void setup() {
   WiFiManager wifiManager;
   //FOR TESTING: reset saved settings
   //wifiManager.resetSettings();
-    
-  //set custom ip for portal
-  //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
-
-  //fetches ssid and pass from eeprom and tries to connect
-  //if it does not connect it starts an access point with the specified name
-  //here  "AutoConnectAP"
-  //and goes into a blocking loop awaiting configuration
+  
   wifiManager.autoConnect("WordclockAP", "passwort");
 
   wifiFirstConnected = true;
-
+  digitalWrite (LED_BUILTIN, LOW); 
   
-  pinMode (LED_BUILTIN, OUTPUT); // Onboard LED
-  digitalWrite (LED_BUILTIN, HIGH); // Switch off LED
-
   NTP.onNTPSyncEvent ([](NTPSyncEvent_t event) {
       ntpEvent = event;
       syncEventTriggered = true;
@@ -124,9 +116,9 @@ void loop() {
     Serial.println(nowMinute);
 
     minuteRounded = nowMinute-(nowMinute%5);
-    if(minuteRounded >= 25) hourCompensated = nowHour + 1; 
+    if(minuteRounded >= 25) hourCompensated = (nowHour + 1)%12; 
 
-    
+    // Reset array to zeroes
     for(int8_t row=0; row<10; row++){
       for(int8_t col=0; col<11; col++){
         display[row][col] = 0;
