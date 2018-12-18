@@ -1,13 +1,16 @@
-#include <TimeLib.h>
-#include "WifiConfig.h"
-#include <NtpClientLib.h>
+// WiFi connectivity
 #include <ESP8266WiFi.h>
-#include <Adafruit_NeoPixel.h>
 
-#ifndef WIFI_CONFIG_H
-#define YOUR_WIFI_SSID "YOUR_WIFI_SSID"
-#define YOUR_WIFI_PASSWD "YOUR_WIFI_PASSWD"
-#endif // !WIFI_CONFIG_H
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         
+
+// NTP and time keeping
+#include <TimeLib.h>
+#include <NtpClientLib.h>
+
+// LED output
+#include <Adafruit_NeoPixel.h>
 
 int8_t timeZone = 1;
 int8_t minutesTimeZone = 0;
@@ -34,18 +37,6 @@ char text[10][11] = {
   {'Z','E','H','N','E','U','N','K','U','H','R'},
 };
 
-void onSTAConnected (WiFiEventStationModeConnected ipInfo) {
-    Serial.printf ("Connected to %s\r\n", ipInfo.ssid.c_str ());
-}
-
-// Start NTP only after IP network is connected
-void onSTAGotIP (WiFiEventStationModeGotIP ipInfo) {
-    Serial.printf ("Got IP: %s\r\n", ipInfo.ip.toString ().c_str ());
-    Serial.printf ("Connected: %s\r\n", WiFi.status () == WL_CONNECTED ? "yes" : "no");
-    digitalWrite (LED_BUILTIN, LOW); // Turn on LED
-    wifiFirstConnected = true;
-}
-
 void processSyncEvent (NTPSyncEvent_t ntpEvent) {
     if (ntpEvent) {
         Serial.print ("Time Sync error: ");
@@ -59,19 +50,10 @@ void processSyncEvent (NTPSyncEvent_t ntpEvent) {
     }
 }
 
-// Manage network disconnection
-void onSTADisconnected (WiFiEventStationModeDisconnected event_info) {
-    Serial.printf ("Disconnected from SSID: %s\n", event_info.ssid.c_str ());
-    Serial.printf ("Reason: %d\n", event_info.reason);
-    digitalWrite (LED_BUILTIN, HIGH); // Turn off LED
-    //NTP.stop(); // NTP sync can be disabled to avoid sync errors
-}
-
 boolean syncEventTriggered = false; // True if a time event has been triggered
 NTPSyncEvent_t ntpEvent; // Last triggered event
 
 void setup() {
-  static WiFiEventHandler e1, e2, e3;
 
   // Init leds to turn off
   leds.begin();
@@ -79,9 +61,24 @@ void setup() {
 
   Serial.begin (115200);
   Serial.println ();
-  WiFi.mode (WIFI_STA);
-  WiFi.begin (YOUR_WIFI_SSID, YOUR_WIFI_PASSWD);
 
+  //WiFiManager
+  WiFiManager wifiManager;
+  //FOR TESTING: reset saved settings
+  //wifiManager.resetSettings();
+    
+  //set custom ip for portal
+  //wifiManager.setAPConfig(IPAddress(10,0,1,1), IPAddress(10,0,1,1), IPAddress(255,255,255,0));
+
+  //fetches ssid and pass from eeprom and tries to connect
+  //if it does not connect it starts an access point with the specified name
+  //here  "AutoConnectAP"
+  //and goes into a blocking loop awaiting configuration
+  wifiManager.autoConnect("WordclockAP", "passwort");
+
+  wifiFirstConnected = true;
+
+  
   pinMode (LED_BUILTIN, OUTPUT); // Onboard LED
   digitalWrite (LED_BUILTIN, HIGH); // Switch off LED
 
@@ -89,10 +86,6 @@ void setup() {
       ntpEvent = event;
       syncEventTriggered = true;
   });
-
-  e1 = WiFi.onStationModeGotIP (onSTAGotIP);// As soon WiFi is connected, start NTP Client
-  e2 = WiFi.onStationModeDisconnected (onSTADisconnected);
-  e3 = WiFi.onStationModeConnected (onSTAConnected);
 
 }
 
