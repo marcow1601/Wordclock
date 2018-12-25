@@ -152,7 +152,8 @@ void loop() {
     Serial.println(nowMinute);
 
     minuteRounded = nowMinute-(nowMinute%5);
-    if(minuteRounded >= 25) hourCompensated = (nowHour + 1)%12; 
+    if(minuteRounded >= 25) hourCompensated = (nowHour + 1)%12;
+    else hourCompensated = nowHour; 
 
     // Reset array to zeroes
     for(int8_t row=0; row<10; row++){
