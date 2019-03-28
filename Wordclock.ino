@@ -28,7 +28,7 @@ int8_t minuteRounded;
 int8_t hourCompensated;
 
 int display[10][11] = {0};
-Adafruit_NeoPixel leds = Adafruit_NeoPixel(110, 5, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds = Adafruit_NeoPixel(114, 5, NEO_GRB + NEO_KHZ800);
 
 char text[10][11] = {
   {'E','S','K','I','S','T','A','F','Ü','N','F'},
@@ -461,6 +461,18 @@ void loop() {
         }
       }
     }
+
+    // Display one minute increments between five minute steps using 4 additional LEDs
+    // Turn off all four LEDs
+    leds.setPixelColor(110, 0,0,0);
+    leds.setPixelColor(111, 0,0,0);
+    leds.setPixelColor(112, 0,0,0);
+    leds.setPixelColor(113, 0,0,0);
+    // Turn on between 0 and 4 additional LEDs
+    for(int8_t minIncrement=110; (minIncrement-110)<(nowMinute%5); minIncrement++){
+      leds.setPixelColor(minIncrement, 175,175,175);
+    }
+    
     leds.show();
   }
   delay (0);
