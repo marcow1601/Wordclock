@@ -445,11 +445,18 @@ void loop() {
         if(display[row][col] == 1){
           // Odd row => right to left number
           if(row%2){
-            leds.setPixelColor(row*11+(10-col), 255,255,255);
+            // Dim LEDs between 11pm and 6am
+            if(hour()>=6 && hour()<=22)
+              leds.setPixelColor(row*11+(10-col), 175,175,175);
+            else
+              leds.setPixelColor(row*11+(10-col), 25,25,25);
           }
           // Even row => left to right number
           else {
-            leds.setPixelColor(row*11+col, 255,255,255);
+            if(hour()>=6 && hour()<=22)
+              leds.setPixelColor(row*11+col, 175,175,175);
+            else
+              leds.setPixelColor(row*11+col, 25,25,25);
           }
         }
       }
