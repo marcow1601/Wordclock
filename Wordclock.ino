@@ -262,7 +262,7 @@ void loop() {
     
     // Is full hour?
     if(minuteRounded == 0){
-      if(hourCompensated == 1) display[5][3] == 0; // "EINS" -> "EIN"
+      if(hourCompensated == 1) display[5][3] = 0; // "EINS" -> "EIN"
 
       // "UHR"
       display[9][8] = 1;
