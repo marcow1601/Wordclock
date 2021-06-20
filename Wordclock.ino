@@ -28,7 +28,7 @@ int8_t minuteRounded;
 int8_t hourCompensated;
 
 int display[10][11] = {0};
-Adafruit_NeoPixel leds = Adafruit_NeoPixel(114, 5, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel leds = Adafruit_NeoPixel(114, 15, NEO_GRBW + NEO_KHZ800);
 
 char text[10][11] = {
   {'E','S','K','I','S','T','A','F','Ü','N','F'},
@@ -159,7 +159,7 @@ void loop() {
     for(int8_t row=0; row<10; row++){
       for(int8_t col=0; col<11; col++){
         display[row][col] = 0;
-        leds.setPixelColor(row*11+col, 0,0,0);
+        leds.setPixelColor(row*11+col, 0,0,0,0);
       }
     }
     
@@ -447,16 +447,16 @@ void loop() {
           if(row%2){
             // Dim LEDs between 11pm and 6am
             if(hour()>=6 && hour()<=22)
-              leds.setPixelColor(row*11+(10-col), 175,175,175);
+              leds.setPixelColor(row*11+(10-col), 0,0,0,75);
             else
-              leds.setPixelColor(row*11+(10-col), 25,25,25);
+              leds.setPixelColor(row*11+(10-col), 0,0,0,25);
           }
           // Even row => left to right number
           else {
             if(hour()>=6 && hour()<=22)
-              leds.setPixelColor(row*11+col, 175,175,175);
+              leds.setPixelColor(row*11+col, 0,0,0,75);
             else
-              leds.setPixelColor(row*11+col, 25,25,25);
+              leds.setPixelColor(row*11+col, 0,0,0,25);
           }
         }
       }
@@ -464,13 +464,13 @@ void loop() {
 
     // Display one minute increments between five minute steps using 4 additional LEDs
     // Turn off all four LEDs
-    leds.setPixelColor(110, 0,0,0);
-    leds.setPixelColor(111, 0,0,0);
-    leds.setPixelColor(112, 0,0,0);
-    leds.setPixelColor(113, 0,0,0);
+    leds.setPixelColor(110, 0,0,0,0);
+    leds.setPixelColor(111, 0,0,0,0);
+    leds.setPixelColor(112, 0,0,0,0);
+    leds.setPixelColor(113, 0,0,0,0);
     // Turn on between 0 and 4 additional LEDs
     for(int8_t minIncrement=110; (minIncrement-110)<(nowMinute%5); minIncrement++){
-      leds.setPixelColor(minIncrement, 175,175,175);
+      leds.setPixelColor(minIncrement, 0,0,0,75);
     }
     
     leds.show();
